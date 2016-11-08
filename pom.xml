@@ -106,7 +106,7 @@
                 <version>0.7.5.201505241946</version>
                 <configuration>
                     <excludes>
-                        <exclude>**/*SchedulerLauncher.*</exclude>
+                        <exclude>**/*SchedulerLauncher*</exclude>
                     </excludes>
                     <rules>
                         <rule>
