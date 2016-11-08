@@ -14,6 +14,7 @@ import java.io.IOException;
 
 public class BridgeReporterScheduler {
     private static final ObjectMapper JSON_OBJECT_MAPPER = new ObjectMapper();
+    private static final String SERVICE_TITLE = "Bridge-Reporter";
 
     private Table ddbReporterConfigTable;
     private AmazonSQSClient sqsClient;
@@ -33,13 +34,13 @@ public class BridgeReporterScheduler {
     }
 
     /**
-     * Sends the Bridge-Reporter request for the given scheduler. This is called by AWS Lambda at the configured interval.
-     * NOTE: This only calls Bridge-Reporter once. The actually scheduling logic is handled by AWS Lambda.
+     * Sends the Bridge-WorkerPlatform request for the given scheduler. This is called by AWS Lambda at the configured interval.
+     * NOTE: This only calls Bridge-WorkerPlatform once. The actually scheduling logic is handled by AWS Lambda.
      *
      * @param schedulerName
      *         scheduler name, used to get scheduler configs
      * @throws IOException
-     *         if constructing the Bridge-EX request fails
+     *         if constructing the Bridge-WorkerPlatform request fails
      */
     public void schedule(String schedulerName) throws IOException {
         // get scheduler config from DDB
@@ -55,14 +56,8 @@ public class BridgeReporterScheduler {
                 + schedulerName);
         DateTimeZone timeZone = DateTimeZone.forID(timeZoneStr);
 
-        // make Bridge-Reporter request JSON
-        ObjectNode requestNode;
-        String requestOverrideJson = schedulerConfig.getString("requestOverrideJson");
-        if (Strings.isNullOrEmpty(requestOverrideJson)) {
-            requestNode = JSON_OBJECT_MAPPER.createObjectNode();
-        } else {
-            requestNode = (ObjectNode) JSON_OBJECT_MAPPER.readTree(requestOverrideJson);
-        }
+        // make Bridge-WorkerPlatform request JSON
+        ObjectNode requestNode = JSON_OBJECT_MAPPER.createObjectNode();
 
         // Parse schedule type
         ScheduleType scheduleType;
@@ -95,7 +90,7 @@ public class BridgeReporterScheduler {
                         .withHourOfDay(23)
                         .withMinuteOfHour(59)
                         .withSecondOfMinute(59)
-                        .withMillisOfSecond(0).toString();
+                        .withMillisOfSecond(999).toString();
                 requestNode.put("startDateTime", yesterdaysStartDateTimeStr);
                 requestNode.put("endDateTime", yesterdaysEndDateTimeStr);
                 requestNode.put("scheduler", schedulerName);
@@ -115,7 +110,7 @@ public class BridgeReporterScheduler {
                         .withHourOfDay(23)
                         .withMinuteOfHour(59)
                         .withSecondOfMinute(59)
-                        .withMillisOfSecond(0).toString();
+                        .withMillisOfSecond(999).toString();
                 requestNode.put("startDateTime", lastWeeksStartDateTimeStr);
                 requestNode.put("endDateTime", lastWeeksEndDateTimeStr);
                 requestNode.put("scheduler", schedulerName);
@@ -127,8 +122,12 @@ public class BridgeReporterScheduler {
         }
 
         // write request to SQS
-        String requestJson = JSON_OBJECT_MAPPER.writeValueAsString(requestNode);
-        System.out.println("Sending request: sqsQueueUrl=" + sqsQueueUrl + ", requestJson=" + requestJson);
+        ObjectNode requestMsg = JSON_OBJECT_MAPPER.createObjectNode();
+        requestMsg.put("service", SERVICE_TITLE);
+        requestMsg.set("body", requestNode);
+
+        String requestJson = JSON_OBJECT_MAPPER.writeValueAsString(requestMsg);
+        System.out.println("Sending request: sqsQueueUrl=" + sqsQueueUrl + ", requestJson=" + requestMsg);
         sqsClient.sendMessage(sqsQueueUrl, requestJson);
     }
 
