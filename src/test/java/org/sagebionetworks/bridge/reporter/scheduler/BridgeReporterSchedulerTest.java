@@ -23,7 +23,7 @@ public class BridgeReporterSchedulerTest {
     private static final String TEST_SCHEDULER_NAME = "test-scheduler";
     private static final String TEST_SQS_QUEUE_URL = "test-sqs-queue";
     private static final String TEST_TIME_ZONE = "Asia/Tokyo";
-    private static final String SERVICE_TITLE = "Bridge-Reporter";
+    private static final String SERVICE_TITLE = "REPORTER";
 
     private AmazonSQSClient mockSqsClient;
     private BridgeReporterScheduler scheduler;

@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class BridgeReporterScheduler {
     private static final ObjectMapper JSON_OBJECT_MAPPER = new ObjectMapper();
-    private static final String SERVICE_TITLE = "Bridge-Reporter";
+    private static final String SERVICE_TITLE = "REPORTER";
 
     private Table ddbReporterConfigTable;
     private AmazonSQSClient sqsClient;
