@@ -7,6 +7,7 @@ mvn verify
 
 (A full build takes about 15 seconds on my laptop, from a clean workspace.)
 
+
 To just run findbugs, run:
 mvn compile findbugs:check
 
