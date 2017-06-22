@@ -23,6 +23,7 @@ public class BridgeReporterSchedulerTest {
     private static final String TEST_SCHEDULER_NAME = "test-scheduler";
     private static final String TEST_SQS_QUEUE_URL = "test-sqs-queue";
     private static final String TEST_TIME_ZONE = "Asia/Tokyo";
+    private static final String SERVICE_TITLE = "REPORTER";
 
     private AmazonSQSClient mockSqsClient;
     private BridgeReporterScheduler scheduler;
@@ -88,17 +89,23 @@ public class BridgeReporterSchedulerTest {
 
         String sqsMessage = sqsMessageCaptor.getValue();
         JsonNode sqsMessageNode = JSON_OBJECT_MAPPER.readTree(sqsMessage);
-        assertEquals(sqsMessageNode.size(), 4);
+        // first assert parent node
+        assertEquals(sqsMessageNode.size(), 2);
+        assertEquals(sqsMessageNode.get("service").asText(), SERVICE_TITLE);
+
+        // then assert body node
+        JsonNode msgBody = sqsMessageNode.path("body");
+        assertEquals(msgBody.size(), 4);
 
         // assert last week
-        String startDateTimeStr = sqsMessageNode.get("startDateTime").textValue();
+        String startDateTimeStr = msgBody.get("startDateTime").textValue();
         assertEquals(DateTime.parse(startDateTimeStr), DateTime.parse("2016-01-25T00:00:00.000+0900"));
 
-        String endDateTimeStr = sqsMessageNode.get("endDateTime").textValue();
-        assertEquals(DateTime.parse(endDateTimeStr), DateTime.parse("2016-01-31T23:59:59.000+0900"));
+        String endDateTimeStr = msgBody.get("endDateTime").textValue();
+        assertEquals(DateTime.parse(endDateTimeStr), DateTime.parse("2016-01-31T23:59:59.999+0900"));
 
-        assertEquals(sqsMessageNode.get("scheduler").textValue(), TEST_SCHEDULER_NAME);
-        assertEquals(sqsMessageNode.get("scheduleType").textValue(), "WEEKLY");
+        assertEquals(msgBody.get("scheduler").textValue(), TEST_SCHEDULER_NAME);
+        assertEquals(msgBody.get("scheduleType").textValue(), "WEEKLY");
     }
     
     @Test
@@ -119,15 +126,22 @@ public class BridgeReporterSchedulerTest {
 
         String sqsMessage = sqsMessageCaptor.getValue();
         JsonNode sqsMessageNode = JSON_OBJECT_MAPPER.readTree(sqsMessage);
-        assertEquals(sqsMessageNode.size(), 4);
+
+        // first assert parent node
+        assertEquals(sqsMessageNode.size(), 2);
+        assertEquals(sqsMessageNode.get("service").asText(), SERVICE_TITLE);
+
+        // then assert body node
+        JsonNode msgBody = sqsMessageNode.path("body");
+        assertEquals(msgBody.size(), 4);
         // assert yesterday
-        String startDateTimeStr = sqsMessageNode.get("startDateTime").textValue();
+        String startDateTimeStr = msgBody.get("startDateTime").textValue();
         assertEquals(DateTime.parse(startDateTimeStr), DateTime.parse("2016-01-31T00:00:00.000+0900"));
 
-        String endDateTimeStr = sqsMessageNode.get("endDateTime").textValue();
-        assertEquals(DateTime.parse(endDateTimeStr), DateTime.parse("2016-01-31T23:59:59.000+0900"));
+        String endDateTimeStr = msgBody.get("endDateTime").textValue();
+        assertEquals(DateTime.parse(endDateTimeStr), DateTime.parse("2016-01-31T23:59:59.999+0900"));
 
-        assertEquals(sqsMessageNode.get("scheduler").textValue(), TEST_SCHEDULER_NAME);
-        assertEquals(sqsMessageNode.get("scheduleType").textValue(), scheduleType);
+        assertEquals(msgBody.get("scheduler").textValue(), TEST_SCHEDULER_NAME);
+        assertEquals(msgBody.get("scheduleType").textValue(), scheduleType);
     }
 }
