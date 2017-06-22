@@ -58,20 +58,20 @@ public class BridgeReporterSchedulerTest {
     @Test
     public void defaultScheduleType() throws Exception {
         // No scheduleType in DDB config. No setup needed. Just call test helper directly.
-        dailyScheduleHelper();
+        dailyScheduleHelper("DAILY");
     }
 
     @Test
     public void dailyScheduleType() throws Exception {
         schedulerConfig.withString("scheduleType", "DAILY");
-        dailyScheduleHelper();
+        dailyScheduleHelper("DAILY");
     }
 
     @Test
     public void invalidScheduleType() throws Exception {
         // falls back to DAILY
         schedulerConfig.withString("scheduleType", "INVALID_TYPE");
-        dailyScheduleHelper();
+        dailyScheduleHelper("DAILY");
     }
 
     @Test
@@ -100,9 +100,16 @@ public class BridgeReporterSchedulerTest {
         assertEquals(sqsMessageNode.get("scheduler").textValue(), TEST_SCHEDULER_NAME);
         assertEquals(sqsMessageNode.get("scheduleType").textValue(), "WEEKLY");
     }
+    
+    @Test
+    public void dailySignupsType() throws Exception {
+        // Add weekly schedule type param.
+        schedulerConfig.withString("scheduleType", "DAILY_SIGNUPS");
+        dailyScheduleHelper("DAILY_SIGNUPS");
+    }
 
     // Helper method for all daily schedule test cases.
-    private void dailyScheduleHelper() throws Exception {
+    private void dailyScheduleHelper(String scheduleType) throws Exception {
         // execute
         scheduler.schedule(TEST_SCHEDULER_NAME);
 
@@ -121,6 +128,6 @@ public class BridgeReporterSchedulerTest {
         assertEquals(DateTime.parse(endDateTimeStr), DateTime.parse("2016-01-31T23:59:59.000+0900"));
 
         assertEquals(sqsMessageNode.get("scheduler").textValue(), TEST_SCHEDULER_NAME);
-        assertEquals(sqsMessageNode.get("scheduleType").textValue(), "DAILY");
+        assertEquals(sqsMessageNode.get("scheduleType").textValue(), scheduleType);
     }
 }

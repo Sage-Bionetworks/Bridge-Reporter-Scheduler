@@ -82,6 +82,7 @@ public class BridgeReporterScheduler {
 
         // insert start datetime, end datetime, scheduler and scheduleType
         switch (scheduleType) {
+            case DAILY_SIGNUPS:
             case DAILY: {
                 // Each day, we export the previous day's data.
                 String yesterdaysStartDateTimeStr = DateTime.now(timeZone)
@@ -99,7 +100,7 @@ public class BridgeReporterScheduler {
                 requestNode.put("startDateTime", yesterdaysStartDateTimeStr);
                 requestNode.put("endDateTime", yesterdaysEndDateTimeStr);
                 requestNode.put("scheduler", schedulerName);
-                requestNode.put("scheduleType", ScheduleType.DAILY.toString());
+                requestNode.put("scheduleType", scheduleType.toString());
             }
             break;
             case WEEKLY: {
@@ -136,5 +137,6 @@ public class BridgeReporterScheduler {
     public enum ScheduleType {
         DAILY,
         WEEKLY,
+        DAILY_SIGNUPS
     }
 }
