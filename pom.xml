@@ -6,7 +6,7 @@
 
     <groupId>org.sagebionetworks</groupId>
     <artifactId>Bridge-Reporter-Scheduler</artifactId>
-    <version>1.1</version>
+    <version>1.0</version>
 
     <properties>
         <aws.version>1.10.49</aws.version>
